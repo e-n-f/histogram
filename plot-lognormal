@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+
+while (<>) {
+	chomp;
+	s/ .*//;
+	if ($_ != 0) {
+		s/^0*//;
+		push @val, log($_);
+	}
+}
+
+@val = sort { $a <=> $b } @val;
+
+$n = $#val + 1;
+if ($n % 2 == 0) {
+	$median = ($val[$n / 2 - 1] + $val[$n / 2]) / 2;
+} else {
+	$median = $val[$n / 2];
+}
+
+$sum = 0;
+for ($i = 0; $i < $n; $i++) {
+	$sum += $val[$i];
+}
+$mean = $sum / $n;
+
+$diffsum = 0;
+for ($i = 0; $i < $n; $i++) {
+	$diffsum += ($val[$i] - $mean) * ($val[$i] - $mean);
+}
+$variance = $diffsum / $n;
+$stddev = sqrt($variance);
+
+$increment = $stddev / 4;
+
+printf STDERR ("%f %f\n", exp($mean), exp($mean + $stddev));
+
+for ($i = $mean - 3 * $stddev; $i < $mean + 3 * $stddev; $i += $increment) {
+	$count = 0;
+	for ($j = 0; $j < $n; $j++) {
+		if ($val[$j] >= $i && $val[$j] < $i + $increment) {
+			$count++;
+		}
+	}
+
+	printf("%f %d\n", exp($i), $count);
+}
