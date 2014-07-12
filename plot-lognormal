@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+$pi = 4 * atan2(1, 1);
+
 while (<>) {
 	chomp;
 	s/ .*//;
@@ -31,7 +33,7 @@ for ($i = 0; $i < $n; $i++) {
 $variance = $diffsum / $n;
 $stddev = sqrt($variance);
 
-$increment = $stddev / 2;
+$increment = $stddev / 4;
 
 printf STDERR ("%f %f (%f)\n", exp($median), exp($median + $stddev), exp($mean));
 
@@ -43,5 +45,34 @@ for ($i = $median - 3 * $stddev; $i < $median + 3 * $stddev; $i += $increment) {
 		}
 	}
 
-	printf("%f %d\n", exp($i), $count);
+	push @x, $i;
+	push @y, $count;
+
+	if ($count > $maxy) {
+		$maxy = $count;
+	}
 }
+
+push @x, $i;
+
+for ($i = 0; $i < $#x; $i++) {
+	printf("%.3f %.3f %s ", 50 + 500 * $i / $#x, 50 + 500 * $y[$i] / $maxy,
+		$i == 0 ? "moveto" : "lineto");
+	printf("%.3f %.3f %s ", 50 + 500 * ($i + 1) / $#x, 50 + 500 * $y[$i] / $maxy,
+		"lineto");
+}
+
+print "stroke\n";
+
+for ($i = 0; $i <= $#x; $i++) {
+	$v = $x[$i];
+
+	$y = $n * $increment / ($stddev * sqrt(2 * $pi)) * exp(- ($v - $median) * ($v - $median) / (2 * $stddev * $stddev));
+
+	print STDERR "$y\n";
+
+	printf("%.3f %.3f %s ", 50 + 500 * $i / $#x, 50 + 500 * $y / $maxy,
+		$i == 0 ? "moveto" : "lineto");
+}
+
+print "stroke\n";
