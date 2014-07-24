@@ -35,7 +35,7 @@ $stddev = sqrt($variance);
 
 $increment = $stddev / 4;
 
-printf STDERR ("%f %f (%f)\n", exp($median), exp($median + $stddev), exp($mean));
+printf STDERR ("%f %f %f (%f) %f\n", exp($median), exp($median + $stddev), exp($median - $stddev), exp($mean), exp($stddev));
 
 for ($i = $median - 3 * $stddev; $i < $median + 3 * $stddev; $i += $increment) {
 	$count = 0;
