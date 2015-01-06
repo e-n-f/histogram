@@ -1,31 +1,52 @@
 #!/usr/bin/perl
 
+while (<>) {
+	chomp;
+	if ($_ > 0) {
+		push @val, $_;
+	}
+}
+
+@val = sort { $a <=> $b } @val;
+
 $p = 1;
 
-$a = 692.66789729;
-$b = 1293.11194020;
-$c = 2207.18617518;
+$a = $val[$#val / 4];
+$b = $val[$#val / 2];
+$c = $val[$#val * .75];
+
+sub boxcox {
+	if ($_[1] == 0) {
+		return log($_[0]);
+	} else {
+		return (exp(log($_[0]) * $_[1]) - 1) / $_[1];
+	}
+}
 
 $diff = .5;
 $direction = 1;
 
 while ($diff > .00001) {
 	print "$a $b $c $p => ";
-	printf("%f %f %f ", exp(log($a) * $p), exp(log($b) * $p), exp(log($c) * $p));
+	printf("%f %f %f ", boxcox($a, $p), boxcox($b, $p), boxcox($c, $p));
 
 	printf("gap %f vs %f\n",
-	    exp(log($c) * $p) - exp(log($b) * $p),
-	    exp(log($b) * $p) - exp(log($a) * $p),
+	    boxcox($c, $p) - boxcox($b, $p),
+	    boxcox($b, $p) - boxcox($a, $p),
 	);
 
-	if (exp(log($c) * $p) - exp(log($b) * $p) >
-	    exp(log($b) * $p) - exp(log($a) * $p)) {
+	if (boxcox($c, $p) - boxcox($b, $p) >
+	    boxcox($b, $p) - boxcox($a, $p)) {
 		print "right is bigger\n";
-		$p -= $diff;
+		if ($p - $diff >= 0) {
+			$p -= $diff;
+		}
 
 		if ($direction != 1) {
 			$direction = 1;
 			$diff /= 2;
+		} else {
+			$diff *= .95;
 		}
 	} else {
 		print "left is bigger\n";
@@ -34,6 +55,8 @@ while ($diff > .00001) {
 		if ($direction != 0) {
 			$direction = 0;
 			$diff /= 2;
+		} else {
+			$diff *= .95;
 		}
 	}
 }
