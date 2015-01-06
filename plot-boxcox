@@ -5,6 +5,7 @@ $pi = 4 * atan2(1, 1);
 while (<>) {
 	chomp;
 	if ($_ > 0) {
+		s/ .*//;
 		push @val, $_;
 	}
 }
@@ -97,7 +98,7 @@ $stddev = sqrt($variance);
 
 $increment = $stddev / 4;
 
-printf STDERR ("%f %f %f (%f) %f\n", unboxcox($median, $p), unboxcox($median + $stddev, $p), unboxcox($median - $stddev, $p), unboxcox($mean, $p), unboxcox($stddev, $p));
+printf STDERR ("median %f median+boxstddev %f median-boxstddev %f\nboxmean %f boxstddev %f scaledmean %f scaledstddev %f\n", unboxcox($median, $p), unboxcox($median + $stddev, $p), unboxcox($median - $stddev, $p), unboxcox($mean, $p), unboxcox($stddev, $p), $mean, $stddev);
 
 for ($i = $mean - 3 * $stddev; $i < $mean + 3 * $stddev; $i += $increment) {
 	$count = 0;
