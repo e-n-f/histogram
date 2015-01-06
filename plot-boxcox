@@ -1,0 +1,151 @@
+#!/usr/bin/perl
+
+$pi = 4 * atan2(1, 1);
+
+while (<>) {
+	chomp;
+	if ($_ > 0) {
+		push @val, $_;
+	}
+}
+
+@val = sort { $a <=> $b } @val;
+
+$p = 1;
+
+$a = $val[$#val / 4];
+$b = $val[$#val / 2];
+$c = $val[$#val * .75];
+
+sub boxcox {
+	if ($_[1] == 0) {
+		return log($_[0]);
+	} else {
+		return (exp(log($_[0]) * $_[1]) - 1) / $_[1];
+	}
+}
+
+sub unboxcox {
+	if ($_[1] == 0) {
+		return exp($_[0]);
+	} else {
+		return exp(log($_[0] * $_[1] + 1) / $_[1]);
+	}
+}
+
+$diff = .5;
+$direction = 1;
+
+while ($diff > .00001) {
+	print STDERR "$a $b $c $p => ";
+	printf STDERR ("%f %f %f ", boxcox($a, $p), boxcox($b, $p), boxcox($c, $p));
+
+	printf STDERR ("gap %f vs %f\n",
+	    boxcox($c, $p) - boxcox($b, $p),
+	    boxcox($b, $p) - boxcox($a, $p),
+	);
+
+	if (boxcox($c, $p) - boxcox($b, $p) >
+	    boxcox($b, $p) - boxcox($a, $p)) {
+		if ($p - $diff >= 0) {
+			$p -= $diff;
+		}
+
+		if ($direction != 1) {
+			$direction = 1;
+			$diff /= 2;
+		} else {
+			$diff *= .95;
+		}
+	} else {
+		$p += $diff;
+
+		if ($direction != 0) {
+			$direction = 0;
+			$diff /= 2;
+		} else {
+			$diff *= .95;
+		}
+	}
+}
+
+
+
+for ($i = 0; $i <= $#val; $i++) {
+	$val[$i] = boxcox($val[$i], $p);
+}
+
+$n = $#val + 1;
+if ($n % 2 == 0) {
+	$median = ($val[$n / 2 - 1] + $val[$n / 2]) / 2;
+} else {
+	$median = $val[$n / 2];
+}
+
+$sum = 0;
+for ($i = 0; $i < $n; $i++) {
+	$sum += $val[$i];
+}
+$mean = $sum / $n;
+
+$diffsum = 0;
+for ($i = 0; $i < $n; $i++) {
+	$diffsum += ($val[$i] - $mean) * ($val[$i] - $mean);
+}
+$variance = $diffsum / $n;
+$stddev = sqrt($variance);
+
+$increment = $stddev / 4;
+
+printf STDERR ("%f %f %f (%f) %f\n", unboxcox($median, $p), unboxcox($median + $stddev, $p), unboxcox($median - $stddev, $p), unboxcox($mean, $p), unboxcox($stddev, $p));
+
+for ($i = $mean - 3 * $stddev; $i < $mean + 3 * $stddev; $i += $increment) {
+	$count = 0;
+	for ($j = 0; $j < $n; $j++) {
+		if ($val[$j] >= $i && $val[$j] < $i + $increment) {
+			$count++;
+		}
+	}
+
+	push @x, $i;
+	push @y, $count;
+
+	if ($count > $maxy) {
+		$maxy = $count;
+	}
+}
+
+push @x, $i;
+
+for ($i = 0; $i < $#x; $i++) {
+	printf("%.3f %.3f %s ", 50 + 500 * $i / $#x, 50 + 500 * $y[$i] / $maxy,
+		$i == 0 ? "moveto" : "lineto");
+	printf("%.3f %.3f %s ", 50 + 500 * ($i + 1) / $#x, 50 + 500 * $y[$i] / $maxy,
+		"lineto");
+}
+
+print "stroke\n";
+
+print "/Helvetica findfont 12 scalefont setfont\n";
+
+for ($i = 0; $i < $#x; $i++) {
+	if (($x[$i] + $x[$i + 1]) / 2 > 0) {
+		print "gsave ";
+		printf("%.3f %.3f %s ", 50 + 500 * ($i + .5) / $#x, 50 + 500 * $y[$i] / $maxy, "moveto");
+		$num = sprintf("%d", unboxcox(($x[$i] + $x[$i + 1]) / 2, $p));
+		print "90 rotate (  $num) show stroke grestore\n";
+	}
+}
+
+for ($i = 0; $i <= $#x; $i++) {
+	$v = $x[$i];
+
+	$y = $n * $increment / ($stddev * sqrt(2 * $pi)) * exp(- ($v - $mean) * ($v - $mean) / (2 * $stddev * $stddev));
+
+	print STDERR "$y\n";
+
+	printf("%.3f %.3f %s ", 50 + 500 * $i / $#x, 50 + 500 * $y / $maxy,
+		$i == 0 ? "moveto" : "lineto");
+}
+
+print "stroke\n";
