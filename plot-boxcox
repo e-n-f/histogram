@@ -14,9 +14,9 @@ while (<>) {
 
 $p = 1;
 
-$a = $val[$#val / 4];
+$a = $val[$#val * .16];
 $b = $val[$#val / 2];
-$c = $val[$#val * .75];
+$c = $val[$#val * .84];
 
 sub boxcox {
 	if ($_[1] == 0) {
@@ -45,6 +45,8 @@ while ($diff > .00001) {
 	    boxcox($c, $p) - boxcox($b, $p),
 	    boxcox($b, $p) - boxcox($a, $p),
 	);
+
+	$est_stddev = boxcox($c, $p) - boxcox($b, $p);
 
 	if (boxcox($c, $p) - boxcox($b, $p) >
 	    boxcox($b, $p) - boxcox($a, $p)) {
@@ -99,6 +101,8 @@ $stddev = sqrt($variance);
 $increment = $stddev / 4;
 
 printf STDERR ("median %f median+boxstddev %f median-boxstddev %f\nboxmean %f boxstddev %f scaledmean %f scaledstddev %f\n", unboxcox($median, $p), unboxcox($median + $stddev, $p), unboxcox($median - $stddev, $p), unboxcox($mean, $p), unboxcox($stddev, $p), $mean, $stddev);
+
+# $stddev = $est_stddev;
 
 for ($i = $mean - 3 * $stddev; $i < $mean + 3 * $stddev; $i += $increment) {
 	$count = 0;
