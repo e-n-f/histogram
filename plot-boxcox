@@ -14,9 +14,9 @@ while (<>) {
 
 $p = 1;
 
-$a = $val[$#val * .16];
+$a = $val[$#val * .15865];
 $b = $val[$#val / 2];
-$c = $val[$#val * .84];
+$c = $val[$#val * .84135];
 
 sub boxcox {
 	if ($_[1] == 0) {
