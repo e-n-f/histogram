@@ -37,7 +37,7 @@ $increment = $stddev / 4;
 
 printf STDERR ("%f %f %f (%f) %f\n", exp($median), exp($median + $stddev), exp($median - $stddev), exp($mean), exp($stddev));
 
-for ($i = $median - 3 * $stddev; $i < $median + 3 * $stddev; $i += $increment) {
+for ($i = $mean - 3 * $stddev; $i < $mean + 3 * $stddev; $i += $increment) {
 	$count = 0;
 	for ($j = 0; $j < $n; $j++) {
 		if ($val[$j] >= $i && $val[$j] < $i + $increment) {
@@ -67,7 +67,7 @@ print "stroke\n";
 for ($i = 0; $i <= $#x; $i++) {
 	$v = $x[$i];
 
-	$y = $n * $increment / ($stddev * sqrt(2 * $pi)) * exp(- ($v - $median) * ($v - $median) / (2 * $stddev * $stddev));
+	$y = $n * $increment / ($stddev * sqrt(2 * $pi)) * exp(- ($v - $mean) * ($v - $mean) / (2 * $stddev * $stddev));
 
 	print STDERR "$y\n";
 
