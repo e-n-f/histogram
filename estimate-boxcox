@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+$p = 1;
+
+$a = 692.66789729;
+$b = 1293.11194020;
+$c = 2207.18617518;
+
+$diff = .5;
+$direction = 1;
+
+while ($diff > .00001) {
+	print "$a $b $c $p => ";
+	printf("%f %f %f ", exp(log($a) * $p), exp(log($b) * $p), exp(log($c) * $p));
+
+	printf("gap %f vs %f\n",
+	    exp(log($c) * $p) - exp(log($b) * $p),
+	    exp(log($b) * $p) - exp(log($a) * $p),
+	);
+
+	if (exp(log($c) * $p) - exp(log($b) * $p) >
+	    exp(log($b) * $p) - exp(log($a) * $p)) {
+		print "right is bigger\n";
+		$p -= $diff;
+
+		if ($direction != 1) {
+			$direction = 1;
+			$diff /= 2;
+		}
+	} else {
+		print "left is bigger\n";
+		$p += $diff;
+
+		if ($direction != 0) {
+			$direction = 0;
+			$diff /= 2;
+		}
+	}
+}
